@@ -2,11 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Responsive To-Do App</title>
+    <title>To-Do App</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-[#222831] min-h-screen px-4 py-6 md:px-10 md:py-10">
-    <h1 class="text-5xl font-bold text-[#DFD0B8] text-center mb-8">To-Do List</h1>
+    <h1 class="text-5xl font-bold text-[#DFD0B8] text-center mb-8">
+      To-Do List
+    </h1>
 
     <div class="flex flex-col lg:flex-row gap-6 justify-center">
       <!-- Input Section -->
@@ -18,8 +20,8 @@
           placeholder="Enter new task"
         />
         <button
+          id="addTaskBtn"
           class="px-6 py-3 bg-[#DFD0B8] text-[#222831] font-bold rounded-md hover:bg-[#948979] hover:text-white transition ease-in h-16"
-          onclick="handleAddTask()"
         >
           Add Task
         </button>
@@ -32,25 +34,31 @@
     </div>
 
     <script>
+      // State: Array to store tasks
       let tasks = [];
 
+      // DOM references
       const taskInput = document.getElementById("taskInput");
       const taskList = document.getElementById("taskList");
+      const addTaskBtn = document.getElementById("addTaskBtn");
 
-      const handleAddTask = () => {
+      // Add new task
+      const addTask = () => {
         const taskName = taskInput.value.trim();
-        if (taskName) {
-          const newTask = {
-            id: Date.now(),
-            name: taskName,
-            done: false,
-          };
-          tasks.push(newTask);
-          taskInput.value = "";
-          renderTasks();
-        }
+        if (!taskName) return;
+
+        const task = {
+          id: Date.now(),
+          name: taskName,
+          done: false,
+        };
+
+        tasks.push(task);
+        taskInput.value = "";
+        renderTasks();
       };
 
+      // Toggle task completion status
       const toggleTask = (id) => {
         tasks = tasks.map((task) =>
           task.id === id ? { ...task, done: !task.done } : task
@@ -58,45 +66,61 @@
         renderTasks();
       };
 
+      // Delete a task
       const deleteTask = (id) => {
         tasks = tasks.filter((task) => task.id !== id);
         renderTasks();
       };
 
-      const renderTasks = () => {
-        taskList.innerHTML = "";
-        tasks.forEach((task) => {
-          const li = document.createElement("li");
-          li.className = `flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 px-4 py-3 rounded-xl border border-[#948979] bg-[#393E46] text-[#DFD0B8] text-lg ${
-            task.done ? "text-[#777]" : ""
-          }`;
+      // Create task HTML element
+      const createTaskElement = ({ id, name, done }) => {
+        const taskItem = document.createElement("li");
+        taskItem.className = `
+          flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 
+          px-4 py-3 rounded-xl border border-[#948979] 
+          bg-[#393E46] text-[#DFD0B8] text-lg ${done ? "text-[#777]" : ""}
+        `;
 
-          li.innerHTML = `
-            <span class="flex-1 ${task.done ? "line-through" : ""}">${task.name}</span>
-            <div class="flex gap-2 flex-wrap">
-              <button 
-                class="px-4 py-1 bg-[#DFD0B8] text-[#222831] rounded-md hover:bg-[#948979] hover:text-white transition"
-                onclick="toggleTask(${task.id})"
-              >
-                Toggle
-              </button>
-              <button 
-                class="px-4 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-                onclick="deleteTask(${task.id})"
-              >
-                Delete
-              </button>
-            </div>
-          `;
-          taskList.appendChild(li);
-        });
+        taskItem.innerHTML = `
+          <span class="flex-1 ${done ? "line-through" : ""}">${name}</span>
+          <div class="flex gap-2 flex-wrap">
+            <button 
+              class="px-4 py-1 bg-[#DFD0B8] text-[#222831] rounded-md hover:bg-[#948979] hover:text-white transition"
+              onclick="toggleTask(${id})"
+            >
+              Toggle
+            </button>
+            <button 
+              class="px-4 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+              onclick="deleteTask(${id})"
+            >
+              Delete
+            </button>
+          </div>
+        `;
+        return taskItem;
       };
 
+      // Render all tasks
+      const renderTasks = () => {
+        taskList.innerHTML = "";
+        tasks.forEach((task) => taskList.appendChild(createTaskElement(task)));
+      };
+
+      // Check if all tasks are completed every 10 seconds
       setInterval(() => {
-        if (tasks.length > 0 && tasks.every((task) => task.done)) {
-          console.log("All tasks done!");
+        if (tasks.length && tasks.every((task) => task.done)) {
+          console.log("✅ All tasks done!");
         }
       }, 10000);
+
+      // Event listener for Add Task button
+      addTaskBtn.addEventListener("click", addTask);
+
+      // Optional: Add task on Enter key press
+      taskInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") addTask();
+      });
     </script>
   </body>
 </html>
