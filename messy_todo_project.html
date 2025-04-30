@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Responsive To-Do App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-[#222831] min-h-screen px-4 py-6 md:px-10 md:py-10">
+    <h1 class="text-5xl font-bold text-[#DFD0B8] text-center mb-8">To-Do List</h1>
+
+    <div class="flex flex-col lg:flex-row gap-6 justify-center">
+      <!-- Input Section -->
+      <div class="flex flex-col md:flex-row gap-4 w-full max-w-2xl mx-auto">
+        <input
+          id="taskInput"
+          class="flex-1 px-4 py-3 rounded-xl border border-[#948979] bg-[#393E46] text-xl text-[#DFD0B8] outline-none h-16"
+          type="text"
+          placeholder="Enter new task"
+        />
+        <button
+          class="px-6 py-3 bg-[#DFD0B8] text-[#222831] font-bold rounded-md hover:bg-[#948979] hover:text-white transition ease-in h-16"
+          onclick="handleAddTask()"
+        >
+          Add Task
+        </button>
+      </div>
+
+      <!-- Task List Section -->
+      <div class="w-full max-w-2xl mx-auto">
+        <ul class="flex flex-col w-full gap-4 mt-6 lg:mt-0" id="taskList"></ul>
+      </div>
+    </div>
+
+    <script>
+      let tasks = [];
+
+      const taskInput = document.getElementById("taskInput");
+      const taskList = document.getElementById("taskList");
+
+      const handleAddTask = () => {
+        const taskName = taskInput.value.trim();
+        if (taskName) {
+          const newTask = {
+            id: Date.now(),
+            name: taskName,
+            done: false,
+          };
+          tasks.push(newTask);
+          taskInput.value = "";
+          renderTasks();
+        }
+      };
+
+      const toggleTask = (id) => {
+        tasks = tasks.map((task) =>
+          task.id === id ? { ...task, done: !task.done } : task
+        );
+        renderTasks();
+      };
+
+      const deleteTask = (id) => {
+        tasks = tasks.filter((task) => task.id !== id);
+        renderTasks();
+      };
+
+      const renderTasks = () => {
+        taskList.innerHTML = "";
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.className = `flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 px-4 py-3 rounded-xl border border-[#948979] bg-[#393E46] text-[#DFD0B8] text-lg ${
+            task.done ? "text-[#777]" : ""
+          }`;
+
+          li.innerHTML = `
+            <span class="flex-1 ${task.done ? "line-through" : ""}">${task.name}</span>
+            <div class="flex gap-2 flex-wrap">
+              <button 
+                class="px-4 py-1 bg-[#DFD0B8] text-[#222831] rounded-md hover:bg-[#948979] hover:text-white transition"
+                onclick="toggleTask(${task.id})"
+              >
+                Toggle
+              </button>
+              <button 
+                class="px-4 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                onclick="deleteTask(${task.id})"
+              >
+                Delete
+              </button>
+            </div>
+          `;
+          taskList.appendChild(li);
+        });
+      };
+
+      setInterval(() => {
+        if (tasks.length > 0 && tasks.every((task) => task.done)) {
+          console.log("All tasks done!");
+        }
+      }, 10000);
+    </script>
+  </body>
+</html>
